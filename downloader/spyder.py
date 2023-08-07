@@ -5,7 +5,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 
 
-class DownloaderDriver(webdriver.Chrome):
+class Spyder(webdriver.Chrome):
     def __init__(self, detach=False):
         chrome_options = Options()
         chrome_options.add_experimental_option("detach", detach)
