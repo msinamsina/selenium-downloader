@@ -14,6 +14,11 @@ Example
 >>> manager = DownloadManager("/home/user/Downloads")
 >>> manager.download('https://www.example.com/example.jpg', 'example.jpg')
 
+>>> from downloader import DownloadManager
+>>> manager = DownloadManager(verbose=False)
+>>> manager.download('https://www.example.com/example.jpg', 'example.jpg')
+
+
 """
 import typer
 import requests
@@ -25,7 +30,7 @@ import atpbar
 
 class DownloadManager:
     """This class is used to download files from the internet."""
-    def __init__(self, destination: str = None, verbose: bool = False):
+    def __init__(self, destination: str = None, verbose: bool = True):
         """This method is used to initialize the class.
 
         Parameters
