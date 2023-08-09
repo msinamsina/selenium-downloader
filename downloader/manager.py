@@ -64,7 +64,7 @@ class DownloadManager:
             The name of the thread.
 
         """
-        filename = os.path.join(self.destination, filename)
+        # filename = os.path.join(self.destination, filename)
         headers = {'Range': f'bytes={start}-{end}'}
         res = requests.get(url, headers=headers, stream=True)
         dl = 0
@@ -91,6 +91,7 @@ class DownloadManager:
             The number of threads to use.
 
         """
+        threads = []
         res = requests.head(url)
         if name:
             file_name = name
@@ -121,10 +122,13 @@ class DownloadManager:
                                          'filename': file_name, 'name': f"thead no. {i}"})
             t.daemon = True
             t.start()
+            threads.append(t)
 
-        main_thread = threading.current_thread()
-        for t in threading.enumerate():
-            if t is main_thread:
-                continue
+        # main_thread = threading.current_thread()
+        for t in threads:
+            # if t is main_thread:
+            #     continue
             t.join()
+        print("before flush")
         atpbar.flush()
+        print("after flush")
