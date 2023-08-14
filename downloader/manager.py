@@ -25,12 +25,12 @@ import requests
 import threading
 import os
 import time
-import atpbar
+from tqdm import tqdm
 
 
 class DownloadManager:
     """This class is used to download files from the internet."""
-    def __init__(self, destination: str = None, verbose: bool = True):
+    def __init__(self, destination: str = None):
         """This method is used to initialize the class.
 
         Parameters
@@ -44,10 +44,8 @@ class DownloadManager:
         else:
             self.destination = destination
 
-        if not verbose:
-            atpbar.disable()
-
-    def handler(self, start: int, end: int, url: str, filename: str = None, name: str = "") -> None:
+    @staticmethod
+    def handler(start: int, end: int, url: str, filename: str = None, name: str = "", position=0) -> None:
         """This method is used to download a file from the internet.
 
         Parameters
@@ -62,6 +60,8 @@ class DownloadManager:
             The name of the file.
         name : str
             The name of the thread.
+        position : int
+            The position of the thread.
 
         """
         # filename = os.path.join(self.destination, filename)
@@ -73,12 +73,12 @@ class DownloadManager:
             st = time.time()
             fp.seek(start)
             content_iter = res.iter_content(chunk_size=1024)
-            for _ in atpbar.atpbar(range(0, total_length, 1024), name=name):
+            for _ in tqdm(range(0, total_length, 1024), desc=name, position=position):
                 chunk = next(content_iter)
                 dl += len(chunk)
                 fp.write(chunk)
 
-    def download(self, url: str, name: str = None, number_of_threads: int = 4) -> None:
+    def download(self, url: str, name: str = None, number_of_threads: int = 4, position=1) -> None:
         """This method is used to download a file from the internet.
 
         Parameters
@@ -89,9 +89,11 @@ class DownloadManager:
             The name of the file.
         number_of_threads : int
             The number of threads to use.
+        position : int
+            The position of the thread.
 
         """
-        threads = []
+        self.threads = []
         res = requests.head(url)
         if name:
             file_name = name
@@ -119,16 +121,12 @@ class DownloadManager:
 
             t = threading.Thread(target=self.handler,
                                  kwargs={'start': start, 'end': end, 'url': url,
-                                         'filename': file_name, 'name': f"thead no. {i}"})
+                                         'filename': file_name, 'name': f"thead no. {i}",
+                                         'position': i+position})
             t.daemon = True
             t.start()
-            threads.append(t)
+            self.threads.append(t)
 
-        # main_thread = threading.current_thread()
-        for t in threads:
-            # if t is main_thread:
-            #     continue
-            t.join()
-        print("before flush")
-        atpbar.flush()
-        print("after flush")
+    def is_active(self):
+        """This method is used to check if any thread is active."""
+        return any(t.is_alive() for t in self.threads)
