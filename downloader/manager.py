@@ -18,7 +18,6 @@ Example
 >>> manager = DownloadManager(verbose=False)
 >>> manager.download('https://www.example.com/example.jpg', 'example.jpg')
 
-
 """
 import typer
 import requests
